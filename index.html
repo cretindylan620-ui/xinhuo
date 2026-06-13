@@ -393,14 +393,21 @@
   function copyAllRecords(){
     var recs=JSON.parse(localStorage.getItem('xiaoNuanRecords')||'[]');
     if(!recs.length){alert('还没有记录');return;}
+    var last=parseInt(localStorage.getItem('xhLastCopy')||'0');
+    var fresh=recs.slice(0,recs.length-last);
+    if(!fresh.length){alert('上次之后还没有新记录');return;}
     var d=new Date(),m=('0'+(d.getMonth()+1)).slice(-2),day=('0'+d.getDate()).slice(-2);
-    var txt='心力流动的痕迹 · '+d.getFullYear()+'.'+m+'.'+day+'\n\n'+recs.map(function(r){
+    var txt='心力流动的痕迹 · '+d.getFullYear()+'.'+m+'.'+day+'\n\n'+fresh.map(function(r){
       var s='【'+r.date+'】\n';
       if(r.body)s+='身体：'+r.body+'\n';
       if(r.word)s+='喂给心火：'+r.word+'\n';
       return s;
     }).join('\n');
-    function done(){var b=document.getElementById('copyBtn');b.textContent='复制成功 ✓';setTimeout(function(){b.textContent='复制记录给沐光';},2000);}
+    function done(){
+      localStorage.setItem('xhLastCopy',recs.length);
+      var b=document.getElementById('copyBtn');b.textContent='复制成功 ✓';
+      setTimeout(function(){b.textContent='复制记录给沐光';},2000);
+    }
     function fallback(){var a=document.createElement('textarea');a.value=txt;document.body.appendChild(a);a.select();document.execCommand('copy');document.body.removeChild(a);done();}
     if(navigator.clipboard){navigator.clipboard.writeText(txt).then(done).catch(fallback);}else{fallback();}
   }
